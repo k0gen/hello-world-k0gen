@@ -1,14 +1,24 @@
 PACKAGE_ID := $(shell grep -o "id: '[^']*'" startos/manifest.ts | sed "s/id: '\([^']*\)'/\1/")
 
-# Phony targets
 .PHONY: all clean install
 
-# Default target
-all: ${PACKAGE_ID}.s9pk
+all: check-deps check-init deps ${PACKAGE_ID}.s9pk
 	@echo " Done!"
-	@echo "   Filesize: $(shell du -h $(PACKAGE_ID).s9pk) is ready"
+	@echo " Filesize: $(shell du -h $(PACKAGE_ID).s9pk) is ready"
 
-# Build targets
+check-deps:
+	@if ! command -v start-cli > /dev/null; then \
+		echo "Error: start-cli not found. Please install it first."; \
+		exit 1; \
+	fi
+
+check-init:
+	@if [ ! -f ~/.startos/developer.key.pem ]; then \
+		start-cli init; \
+	fi
+
+deps: node_modules javascript/index.js
+
 ${PACKAGE_ID}.s9pk: $(shell start-cli s9pk list-ingredients)
 	start-cli s9pk pack
 
@@ -21,13 +31,11 @@ node_modules: package.json package-lock.json
 package-lock.json: package.json
 	npm i
 
-# Clean target
 clean:
 	rm -rf ${PACKAGE_ID}.s9pk
 	rm -rf javascript
 	rm -rf node_modules
 
-# Install target
 install:
 	@if [ ! -f ~/.startos/config.yaml ]; then echo "You must define \"host: http://server-name.local\" in ~/.startos/config.yaml config file first."; exit 1; fi
 	@echo "\nInstalling to $$(grep -v '^#' ~/.startos/config.yaml | cut -d'/' -f3) ...\n"
