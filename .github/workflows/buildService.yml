@@ -12,6 +12,9 @@ on:
 jobs:
   BuildPackage:
     runs-on: ubuntu-latest
+    services:
+      docker:
+        image: docker:dind
     steps:
       - name: Prepare StartOS SDK
         uses: k0gen/sdk@v2
