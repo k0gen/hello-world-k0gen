@@ -27,7 +27,7 @@ jobs:
         run: |
           git submodule update --init --recursive
           start-cli init
-          make
+          RUST_LOG=debug make
           echo "package_id=$(grep -o "id: '[^']*'" startos/manifest.ts | sed "s/id: '\([^']*\)'/\1/")" >> $GITHUB_ENV
           printf "\n SHA256SUM: $(sha256sum ${PACKAGE_ID}.s9pk) \n"
         shell: bash
