@@ -1,10 +1,10 @@
 PACKAGE_ID := $(shell grep -o "id: '[^']*'" startos/manifest.ts | sed "s/id: '\([^']*\)'/\1/")
 
-.PHONY: all clean install
+.PHONY: all clean install build-js
 
 all: check-deps check-init deps ${PACKAGE_ID}.s9pk
 	@echo " Done!"
-	@echo " Filesize: $(shell du -h $(PACKAGE_ID).s9pk) is ready"
+	@echo " Filesize:$(shell du -h $(PACKAGE_ID).s9pk) is ready"
 
 check-deps:
 	@if ! command -v start-cli > /dev/null; then \
@@ -17,9 +17,12 @@ check-init:
 		start-cli init; \
 	fi
 
-deps: node_modules javascript/index.js
+deps: node_modules build-js
 
-${PACKAGE_ID}.s9pk: $(shell start-cli s9pk list-ingredients)
+build-js: javascript/index.js
+
+${PACKAGE_ID}.s9pk: build-js
+	$(eval INGREDIENTS := $(shell start-cli s9pk list-ingredients))
 	start-cli s9pk pack
 
 javascript/index.js: $(shell git ls-files startos) tsconfig.json node_modules package.json
