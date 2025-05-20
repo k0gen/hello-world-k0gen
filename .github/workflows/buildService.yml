@@ -26,7 +26,8 @@ jobs:
         run: |
           start-cli init
           RUST_LOG=debug RUST_BACKTRACE=1 make
-          echo "package_id=$(grep -o "id: '[^']*'" startos/manifest.ts | sed "s/id: '\([^']*\)'/\1/")" >> $GITHUB_ENV
+          PACKAGE_ID=$(grep -o "id: '[^']*'" startos/manifest.ts | sed "s/id: '\([^']*\)'/\1/")
+          echo "package_id=${PACKAGE_ID}" >> $GITHUB_ENV
           printf "\n SHA256SUM: $(sha256sum ${PACKAGE_ID}.s9pk) \n"
         shell: bash
 
